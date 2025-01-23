@@ -65,7 +65,7 @@ class Trainer:
     def train(self, num_epochs):
         for epoch in range(num_epochs):
             losses = self.train_one_epoch(epoch)
-            self.total_losses.extend(losses)
+            self.loss.extend(losses)
 
             if self.save_checkpoints:
                 if (epoch+1)%self.save_checkpoints == 0:
