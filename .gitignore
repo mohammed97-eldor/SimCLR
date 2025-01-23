@@ -1,2 +1,3 @@
 *.gz
 cifar*
+__pycache__

@@ -6,7 +6,7 @@ import torchvision.transforms.functional as F
 from torchvision.transforms.functional import crop, resize
 from torchvision.transforms import InterpolationMode
 import matplotlib.pyplot as plt
-from data_generator import ContrastiveLearningDataset
+from .data_generator import ContrastiveLearningDataset
 
 
 CROP_PROPORTION = 0.875  # Standard for ImageNet.
