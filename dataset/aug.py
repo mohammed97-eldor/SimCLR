@@ -5,6 +5,8 @@ import torchvision.transforms as T
 import torchvision.transforms.functional as F
 from torchvision.transforms.functional import crop, resize
 from torchvision.transforms import InterpolationMode
+import matplotlib.pyplot as plt
+from data_generator import ContrastiveLearningDataset
 
 
 CROP_PROPORTION = 0.875  # Standard for ImageNet.
@@ -240,9 +242,6 @@ def crop_and_resize(image, height, width):
     resized_image = resize(cropped_image, (height, width), interpolation=InterpolationMode.BICUBIC)
     return resized_image
 
-import torch
-import torch.nn.functional as F
-
 def gaussian_blur(image, kernel_size, sigma, padding='same'):
     """
     Blurs the given image with separable convolution.
@@ -366,3 +365,35 @@ def preprocess_for_train(image, height, width, color_distort=True, crop=True, fl
     image = torch.clamp(image, 0., 1.)  # Clip to ensure the pixel values are within [0, 1]
     
     return image
+
+def main(path_download = "./data"):
+
+    data_loader = ContrastiveLearningDataset(path_download).get_dataset()
+    for batch in data_loader:
+        break
+
+    preprocessed_image = batch[0][0,:,:,:].permute(1,2,0).cpu().numpy()
+    preprocessed_image = np.clip(preprocessed_image, 0, 1)
+    plt.imshow(preprocessed_image)
+    plt.axis('off')
+    plt.title("Original Image")
+    plt.show()
+
+    preprocessed_image = preprocess_for_train(batch[0][0,:,:,:], height=32, width=32, color_distort=True, crop=True, flip=True)
+    preprocessed_image = preprocessed_image.cpu().numpy()
+    preprocessed_image = np.clip(preprocessed_image, 0, 1)
+    plt.imshow(preprocessed_image)
+    plt.axis('off')
+    plt.title("First Randomly Augmentation")
+    plt.show()
+
+    preprocessed_image = preprocess_for_train(batch[0][0,:,:,:], height=32, width=32, color_distort=True, crop=True, flip=True)
+    preprocessed_image = preprocessed_image.cpu().numpy()
+    preprocessed_image = np.clip(preprocessed_image, 0, 1)
+    plt.imshow(preprocessed_image)
+    plt.axis('off')
+    plt.title("Second Randomly Augmentation")
+    plt.show()
+
+if __name__ == "__main__":
+    main()
