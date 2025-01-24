@@ -1,3 +1,4 @@
 *.gz
 cifar*
 __pycache__
+*.pt
