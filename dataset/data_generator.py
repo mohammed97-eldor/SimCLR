@@ -43,9 +43,9 @@ class ContrastiveLearningDataset:
         if transform == None:
             transform = self.get_transformations()
 
-        dataset = CIFAR10(root=self.root_folder, train=True, download=True, transform=transform)
+        dataset = CIFAR10(root=self.root_folder, train=False, download=True, transform=transform)
 
-        subset_indices = list(range(self.train_sample, self.train_sample+self.val_sample+1))
+        subset_indices = list(range(self.val_sample))
         small_dataset = torch.utils.data.Subset(dataset, subset_indices)
 
         # DataLoader for batching

@@ -1,5 +1,6 @@
 import os
 import json
+from copy import deepcopy
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -11,7 +12,7 @@ from dataset import preprocess_for_train
 
 class Trainer:
     def __init__(self, model, dataloader, optimizer, save_checkpoints = None,
-                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 10,
+                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 1000,
                  checkpoint_dir = "./checkpoints", scheduler=None, dataloader_val = None):
         self.model = model
         self.device = next(self.model.parameters()).device
@@ -107,7 +108,8 @@ class Trainer:
             print("No validation dataset provided.")
             return None
 
-        self.model.eval()
+        eval_model = deepcopy(self.model)
+        eval_model.eval()
         val_losses = []
 
         with torch.no_grad():
@@ -121,7 +123,7 @@ class Trainer:
                     augmented_batch.extend([augmented_1, augmented_2])
 
                 augmented_batch = torch.stack(augmented_batch)
-                representations = self.model(augmented_batch.permute(0, 3, 1, 2))
+                representations = eval_model(augmented_batch.permute(0, 3, 1, 2))
                 projections = self.normalizer(representations, dim=1)
                 loss = self.criterion(projections)
 
@@ -134,6 +136,8 @@ class Trainer:
         avg_loss = np.mean(val_losses)
         self.tracker[epoch+1]["Loss_val"] = avg_loss
         print(f"Epoch {epoch+1}, Validation Loss: {avg_loss:.4f}")
+
+        del eval_model
 
         return val_losses
     
@@ -171,7 +175,7 @@ class Trainer:
             losses = self.train_one_epoch(epoch)
             self.total_loss.extend(losses)
 
-            if self.dataloader_val and (epoch)%self.validationstep == 0:
+            if self.dataloader_val and (epoch+1)%self.validationstep == 0:
                 eval_loss = self.eval(epoch)
                 self.total_eval_loss.extend(list(eval_loss))
 
