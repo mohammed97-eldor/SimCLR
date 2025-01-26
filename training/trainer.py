@@ -11,19 +11,22 @@ from dataset import preprocess_for_train
 
 class Trainer:
     def __init__(self, model, dataloader, optimizer, save_checkpoints = None,
-                 criterion = contrastive_loss, normalizer = l2_normalize,
-                 checkpoint_dir = "./checkpoints", scheduler=None):
+                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 10,
+                 checkpoint_dir = "./checkpoints", scheduler=None, dataloader_val = None):
         self.model = model
         self.device = next(self.model.parameters()).device
         self.dataloader = dataloader
+        self.dataloader_val = dataloader_val
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.normalizer = normalizer
         self.total_loss = []
+        self.total_eval_loss = []
         self.checkpoint_dir = checkpoint_dir
         self.save_checkpoints = save_checkpoints
         self.tracker = {}
+        self.validationstep = validationstep
         os.makedirs(self.checkpoint_dir, exist_ok=True)
 
     def save_checkpoint(self, epoch):
@@ -90,10 +93,67 @@ class Trainer:
             self.scheduler.step()
 
         self.tracker[epoch+1] = {"Loss": np.mean(losses), "lr": self.optimizer.param_groups[0]['lr']}
-        
         print(f"Epoch {epoch+1}, Loss: {np.mean(losses)}, lr: {self.optimizer.param_groups[0]['lr']}")
 
         return losses
+    
+    def eval(self, epoch):
+        """Evaluate the model on the validation dataset."""
+        if self.dataloader_val is None:
+            print("No validation dataset provided.")
+            return None
+
+        self.model.eval()
+        val_losses = []
+
+        with torch.no_grad():
+            for mini_batch in tqdm(self.dataloader_val, desc="Evaluating"):
+                mini_batch = mini_batch[0].to(self.device)
+                augmented_batch = []
+                
+                for image in mini_batch:
+                    augmented_1 = preprocess_for_train(image, height=32, width=32, color_distort=True, crop=True, flip=True)
+                    augmented_2 = preprocess_for_train(image, height=32, width=32, color_distort=True, crop=True, flip=True)
+                    augmented_batch.extend([augmented_1, augmented_2])
+
+                augmented_batch = torch.stack(augmented_batch)
+                representations = self.model(augmented_batch.permute(0, 3, 1, 2))
+                projections = self.normalizer(representations, dim=1)
+                loss = self.criterion(projections)
+
+                val_losses.append(loss.item())
+
+        avg_loss = np.mean(val_losses)
+        self.tracker[epoch+1]["Loss_val"] = np.mean(avg_loss)
+        print(f"Epoch {epoch+1}, Validation Loss: {avg_loss:.4f}")
+
+        return val_losses
+    
+    def plot_losses(self):
+        """Plots training loss and evaluation loss."""
+        epochs = list(self.tracker.keys())
+        train_losses = [self.tracker[epoch]["Loss"] for epoch in epochs]
+
+        eval_epochs = []
+        for i in self.tracker.keys():
+            if (int(i)-1)%10 == 0:
+                eval_epochs.append(i)
+
+        eval_losses = [self.tracker[eval_epoch]["Loss_val"] for eval_epoch in eval_epochs]
+
+        plt.figure()
+        plt.plot(epochs, train_losses, label="Training Loss", marker="o")
+        plt.plot(eval_epochs, eval_losses, label="Validation Loss", marker="x", linestyle="--", color="orange")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Training and Validation Loss per Epoch")
+        plt.legend()
+        plt.grid()
+
+        loss_plot_path = os.path.join(self.checkpoint_dir, "loss_plot.png")
+        plt.savefig(loss_plot_path)
+        plt.close()
+        print(f"Loss plot saved to {loss_plot_path}")
 
     def train(self, num_epochs, resume_checkpoint=None):
         start_epoch = 0
@@ -103,6 +163,10 @@ class Trainer:
             losses = self.train_one_epoch(epoch)
             self.total_loss.extend(losses)
 
+            if self.dataloader_val and (epoch)%self.validationstep == 0:
+                eval_loss = self.eval(epoch)
+                self.total_eval_loss.extend(list(eval_loss))
+
             if self.save_checkpoints and (epoch+1)%self.save_checkpoints == 0:
                 self.save_checkpoint(epoch)
         
@@ -111,21 +175,8 @@ class Trainer:
             json.dump(self.tracker, f)
         print(f"Tracker saved to {tracker_path}")
 
-        # Plot loss as a function of epoch
-        epochs = list(self.tracker.keys())
-        losses = [self.tracker[epoch]["Loss"] for epoch in epochs]
+        self.plot_losses()
 
-        plt.figure()
-        plt.plot(epochs, losses, label="Loss")
-        plt.xlabel("Epoch")
-        plt.ylabel("Loss")
-        plt.title("Training Loss per Epoch")
-        plt.legend()
-        plt.grid()
-        loss_plot_path = os.path.join(self.checkpoint_dir, "loss_plot.png")
-        plt.savefig(loss_plot_path)
-        plt.close()
-        print(f"Loss plot saved to {loss_plot_path}")
 
 if __name__ == "__main__":
     print("The trainer class is a custom class and to run the training script refer to the main function")

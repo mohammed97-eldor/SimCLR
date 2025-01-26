@@ -19,6 +19,8 @@ def main(data_dir="./dataset/data",
 
     # Set up data loader
     data_loader = ContrastiveLearningDataset(data_dir).get_dataset()
+
+    data_loader_val = ContrastiveLearningDataset(data_dir).get_dataset_val()
     
     # Initialize model
     model = ResNetSimCLR(size=resnet_size, device=device, embedding_dim=embedding_dim)
@@ -33,7 +35,8 @@ def main(data_dir="./dataset/data",
         dataloader=data_loader,
         optimizer=optimizer,
         save_checkpoints=save_checkpoints,
-        scheduler=scheduler
+        scheduler=scheduler,
+        dataloader_val = data_loader_val
     )
     
     # Start or resume training
