@@ -95,6 +95,10 @@ class Trainer:
         self.tracker[epoch+1] = {"Loss": np.mean(losses), "lr": self.optimizer.param_groups[0]['lr']}
         print(f"Epoch {epoch+1}, Loss: {np.mean(losses)}, lr: {self.optimizer.param_groups[0]['lr']}")
 
+        # Clear GPU memory
+        del mini_batch, augmented_batch, representations, projections, loss
+        torch.cuda.empty_cache()
+
         return losses
     
     def eval(self, epoch):
@@ -123,8 +127,12 @@ class Trainer:
 
                 val_losses.append(loss.item())
 
+                # Clear GPU memory for each batch
+                del mini_batch, augmented_batch, representations, projections, loss
+                torch.cuda.empty_cache()
+
         avg_loss = np.mean(val_losses)
-        self.tracker[epoch+1]["Loss_val"] = np.mean(avg_loss)
+        self.tracker[epoch+1]["Loss_val"] = avg_loss
         print(f"Epoch {epoch+1}, Validation Loss: {avg_loss:.4f}")
 
         return val_losses
@@ -169,6 +177,9 @@ class Trainer:
 
             if self.save_checkpoints and (epoch+1)%self.save_checkpoints == 0:
                 self.save_checkpoint(epoch)
+
+            # Clear GPU memory after each epoch
+            torch.cuda.empty_cache()
         
         tracker_path = os.path.join(self.checkpoint_dir, "tracker.json")
         with open(tracker_path, "w") as f:

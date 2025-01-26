@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 class ContrastiveLearningDataset:
 
-    def __init__(self, root_folder = './data', batch_size = 32, img_size = 32, train_sample = 1000, val_sample = 200):
+    def __init__(self, root_folder = './data', batch_size = 32, img_size = 32, train_sample = 1024, val_sample = 256):
         self.root_folder = root_folder
         self.batch_size = batch_size
         self.img_size = img_size
