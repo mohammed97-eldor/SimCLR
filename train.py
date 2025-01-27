@@ -36,7 +36,7 @@ def main(data_dir="./dataset/data",
         optimizer=optimizer,
         save_checkpoints=save_checkpoints,
         scheduler=scheduler,
-        # dataloader_val = data_loader_val
+        dataloader_val = data_loader_val
     )
     
     # Start or resume training
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     parser.add_argument("--weight_decay", type=float, default=0.0001, help="Weight decay for optimizer.")
     parser.add_argument("--step_size", type=int, default=20, help="Step size for LR scheduler.")
     parser.add_argument("--gamma", type=float, default=0.5, help="Gamma value for LR scheduler.")
-    parser.add_argument("--save_checkpoints", type=int, default=20, help="Frequency (in epochs) to save checkpoints. Set to None to disable.")
-    parser.add_argument("--num_epochs", type=int, default=300, help="Number of training epochs.")
+    parser.add_argument("--save_checkpoints", type=int, default=10, help="Frequency (in epochs) to save checkpoints. Set to None to disable.")
+    parser.add_argument("--num_epochs", type=int, default=100, help="Number of training epochs.")
     parser.add_argument("--resume_checkpoint", type=str, default=None, help="Path to a checkpoint to resume training from.")
 
     args = parser.parse_args()

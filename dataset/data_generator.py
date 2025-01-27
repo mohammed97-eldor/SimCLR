@@ -49,7 +49,7 @@ class ContrastiveLearningDataset:
         small_dataset = torch.utils.data.Subset(dataset, subset_indices)
 
         # DataLoader for batching
-        data_loader = DataLoader(small_dataset, batch_size=self.batch_size, shuffle=True)
+        data_loader = DataLoader(small_dataset, batch_size=self.batch_size, shuffle=False)
 
         return data_loader
     
