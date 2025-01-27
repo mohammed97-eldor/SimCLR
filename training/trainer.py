@@ -147,11 +147,14 @@ class Trainer:
         train_losses = [self.tracker[epoch]["Loss"] for epoch in epochs]
 
         eval_epochs = []
-        for i in self.tracker.keys():
-            if (int(i)-1)%10 == 0:
-                eval_epochs.append(i)
+        if self.dataloader_val:
+            for i in self.tracker.keys():
+                if (int(i))%self.validationstep == 0:
+                    eval_epochs.append(i)
 
-        eval_losses = [self.tracker[eval_epoch]["Loss_val"] for eval_epoch in eval_epochs]
+            eval_losses = [self.tracker[eval_epoch]["Loss_val"] for eval_epoch in eval_epochs]
+        else:
+            eval_losses = []
 
         plt.figure()
         plt.plot(epochs, train_losses, label="Training Loss", marker="o")
