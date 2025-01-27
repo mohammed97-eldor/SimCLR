@@ -26,7 +26,7 @@ def main(data_dir="./dataset/data",
     model = ResNetSimCLR(size=resnet_size, device=device, embedding_dim=embedding_dim)
     
     # Set up optimizer and scheduler
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
     
     # Initialize Trainer
@@ -36,7 +36,7 @@ def main(data_dir="./dataset/data",
         optimizer=optimizer,
         save_checkpoints=save_checkpoints,
         scheduler=scheduler,
-        dataloader_val = data_loader_val
+        # dataloader_val = data_loader_val
     )
     
     # Start or resume training

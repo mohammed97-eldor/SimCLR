@@ -12,7 +12,7 @@ from dataset import preprocess_for_train
 
 class Trainer:
     def __init__(self, model, dataloader, optimizer, save_checkpoints = None,
-                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 1000,
+                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 10,
                  checkpoint_dir = "./checkpoints", scheduler=None, dataloader_val = None):
         self.model = model
         self.device = next(self.model.parameters()).device
