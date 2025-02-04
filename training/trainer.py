@@ -13,9 +13,12 @@ from dataset import preprocess_for_train
 class Trainer:
     def __init__(self, model, dataloader, optimizer, save_checkpoints = None,
                  criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 10,
-                 checkpoint_dir = "./checkpoints", scheduler=None, dataloader_val = None):
+                 checkpoint_dir = "./checkpoints", scheduler=None, dataloader_val = None, device = "cuda"):
         self.model = model
-        self.device = next(self.model.parameters()).device
+        self.device = device
+        # print(self.device)
+        self.model.to(self.device)
+        # print(self.model.device)
         self.dataloader = dataloader
         self.dataloader_val = dataloader_val
         self.criterion = criterion
@@ -28,7 +31,7 @@ class Trainer:
         self.save_checkpoints = save_checkpoints
         self.tracker = {}
         self.validationstep = validationstep
-        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        os.makedirs(self.checkpoint_dir, exist_ok=True) 
 
     def save_checkpoint(self, epoch):
         checkpoint = {
@@ -72,7 +75,7 @@ class Trainer:
         self.model.train()
         losses = []
         for mini_batch in tqdm(self.dataloader):
-            mini_batch = mini_batch[0].to(self.device)
+            mini_batch = mini_batch[0]
             augmented_batch = []  # To store 2N images
             for image in mini_batch:
                 augmented_1 = preprocess_for_train(image, height=32, width=32, color_distort=True, crop=True, flip=True)  # First augmentation
@@ -80,7 +83,9 @@ class Trainer:
                 augmented_batch.extend([augmented_1, augmented_2])  # Append both
 
             augmented_batch = torch.stack(augmented_batch)  # Shape: [2N, C, H, W]
-            representations = self.model(augmented_batch.permute(0,3,1,2))
+            augmented_batch = augmented_batch.permute(0,3,1,2).to(self.device)
+            # print(self.model.device, augmented_batch.device)
+            representations = self.model(augmented_batch)
             projections = self.normalizer(representations, dim=1)
             loss = self.criterion(projections)
             

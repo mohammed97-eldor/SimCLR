@@ -36,7 +36,8 @@ def main(data_dir="./dataset/data",
         optimizer=optimizer,
         save_checkpoints=save_checkpoints,
         scheduler=scheduler,
-        dataloader_val = data_loader_val
+        dataloader_val = data_loader_val,
+        device = device
     )
     
     # Start or resume training
