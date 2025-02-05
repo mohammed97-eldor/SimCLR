@@ -13,11 +13,14 @@ def main(data_dir="./dataset/mvtech",
          embedding_dim=64, 
          lr=0.01, 
          weight_decay=0.0001, 
-         step_size=40, 
+         step_size=5, 
          gamma=0.5, 
-         save_checkpoints=20, 
-         num_epochs=100, 
-         resume_checkpoint=None):
+         save_checkpoints=5, 
+         num_epochs=40, 
+         resume_checkpoint=None,
+         optimizer_type = "SGD",
+         validationstep = 5,
+         use_scheduler = False):
 
     save_dataset_json(data_dir, json_path)
     data_loader, data_loader_val = create_dataloaders(json_path=json_path)
@@ -26,8 +29,16 @@ def main(data_dir="./dataset/mvtech",
     model = ResNetSimCLR(size=resnet_size, device=device, embedding_dim=embedding_dim)
     
     # Set up optimizer and scheduler
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
+    optimizer_dict = {
+        "SGD": torch.optim.SGD,
+        "Adam": torch.optim.Adam,
+        "AdamW": torch.optim.AdamW
+    }
+    optimizer = optimizer_dict[optimizer_type](model.parameters(), lr=lr, weight_decay=weight_decay)
+    if use_scheduler:
+        scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
+    else:
+        scheduler = None
     
     # Initialize Trainer
     trainer = Trainer(
@@ -35,6 +46,7 @@ def main(data_dir="./dataset/mvtech",
         dataloader=data_loader,
         optimizer=optimizer,
         save_checkpoints=save_checkpoints,
+        validationstep = validationstep,
         scheduler=scheduler,
         dataloader_val = data_loader_val,
         device = device
@@ -56,6 +68,9 @@ if __name__ == "__main__":
     parser.add_argument("--save_checkpoints", type=int, default=5, help="Frequency (in epochs) to save checkpoints. Set to None to disable.")
     parser.add_argument("--num_epochs", type=int, default=40, help="Number of training epochs.")
     parser.add_argument("--resume_checkpoint", type=str, default=None, help="Path to a checkpoint to resume training from.")
+    parser.add_argument("--optimizer_type", type=str, choices=["SGD", "Adam", "AdamW"], default="SGD", help="Training optimizer")
+    parser.add_argument("--validationstep", type=int, default=5, help="Apply validation every validationstep")
+    parser.add_argument("--use_scheduler", type=bool, default=True, help="True for learning rate schedualer")
 
     args = parser.parse_args()
     main(**vars(args))

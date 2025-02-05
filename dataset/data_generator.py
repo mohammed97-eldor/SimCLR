@@ -72,3 +72,8 @@ def create_dataloaders(json_path='dataset/dataset.json', batch_size=32, img_size
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     
     return train_loader, val_loader
+
+if __name__ == "__main__":
+    save_dataset_json(root_folder='./mvtec', json_path='./dataset.json')
+    train_loader, val_loader = create_dataloaders(json_path='./dataset.json')
+    print("Train dataloader and Val dataloader size: ", len(train_loader), len(val_loader))
