@@ -51,10 +51,10 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_dim", type=int, default=64, help="Dimensionality of the embedding space.")
     parser.add_argument("--lr", type=float, default=0.01, help="Learning rate.")
     parser.add_argument("--weight_decay", type=float, default=0.0001, help="Weight decay for optimizer.")
-    parser.add_argument("--step_size", type=int, default=20, help="Step size for LR scheduler.")
+    parser.add_argument("--step_size", type=int, default=5, help="Step size for LR scheduler.")
     parser.add_argument("--gamma", type=float, default=0.5, help="Gamma value for LR scheduler.")
-    parser.add_argument("--save_checkpoints", type=int, default=10, help="Frequency (in epochs) to save checkpoints. Set to None to disable.")
-    parser.add_argument("--num_epochs", type=int, default=100, help="Number of training epochs.")
+    parser.add_argument("--save_checkpoints", type=int, default=5, help="Frequency (in epochs) to save checkpoints. Set to None to disable.")
+    parser.add_argument("--num_epochs", type=int, default=40, help="Number of training epochs.")
     parser.add_argument("--resume_checkpoint", type=str, default=None, help="Path to a checkpoint to resume training from.")
 
     args = parser.parse_args()
