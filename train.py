@@ -1,11 +1,13 @@
+import os
 import torch
 from training import Trainer
 from models import ResNetSimCLR
-from dataset import ContrastiveLearningDataset
+from dataset import save_dataset_json, MvTecDataset, create_dataloaders
 from torch.optim.lr_scheduler import StepLR
 import argparse
 
-def main(data_dir="./dataset/data", 
+def main(data_dir="./dataset/mvtech",
+         json_path = "./dataset/dataset.json",
          resnet_size=50, 
          device="cuda", 
          embedding_dim=64, 
@@ -17,10 +19,8 @@ def main(data_dir="./dataset/data",
          num_epochs=100, 
          resume_checkpoint=None):
 
-    # Set up data loader
-    data_loader = ContrastiveLearningDataset(data_dir).get_dataset()
-
-    data_loader_val = ContrastiveLearningDataset(data_dir).get_dataset_val()
+    save_dataset_json(data_dir, json_path)
+    data_loader, data_loader_val = create_dataloaders(json_path=json_path)
     
     # Initialize model
     model = ResNetSimCLR(size=resnet_size, device=device, embedding_dim=embedding_dim)
@@ -45,7 +45,7 @@ def main(data_dir="./dataset/data",
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a SimCLR model.")
-    parser.add_argument("--data_dir", type=str, default="./dataset/data", help="Path to dataset directory.")
+    parser.add_argument("--data_dir", type=str, default="./dataset/mvtec", help="Path to dataset directory.")
     parser.add_argument("--resnet_size", type=int, default=50, choices=[18, 50, 101], help="Size of ResNet model.")
     parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"], help="Device to train on.")
     parser.add_argument("--embedding_dim", type=int, default=64, help="Dimensionality of the embedding space.")
