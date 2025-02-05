@@ -39,12 +39,19 @@ class MvTecDataset(Dataset):
             dataset_dict = json.load(file)
         
         self.items = dataset_dict['train'] if train else dataset_dict['val']
-        self.transform = transforms.Compose([
-            transforms.Resize((img_size, img_size)),
-            transforms.RandomHorizontalFlip() if train else transforms.Lambda(lambda x: x),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std)
-        ])
+        if train:
+            self.transform = transforms.Compose([
+                transforms.Resize((img_size, img_size)),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std)
+            ])
+        else:
+            self.transform = transforms.Compose([
+                transforms.Resize((img_size, img_size)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std)
+            ])
 
     def __len__(self):
         return len(self.items)
