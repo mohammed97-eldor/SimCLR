@@ -7,3 +7,7 @@ __pycache__
 *.mp4
 *.avi
 *.json
+SimCLR
+mvtec
+.DS*
+*.pdf
