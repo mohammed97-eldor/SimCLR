@@ -11,3 +11,4 @@ SimCLR
 mvtec
 .DS*
 *.pdf
+*ipynb
