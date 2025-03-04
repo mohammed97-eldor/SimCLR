@@ -20,9 +20,9 @@ class ResNetSimCLR(nn.Module):
             self.model = models.resnet50(pretrained=False)
 
         self.dim_mlp = self.model.fc.in_features
-        self.model.fc = torch.nn.Sequential(torch.nn.Linear(self.dim_mlp, self.dim_mlp),
+        self.model.fc = torch.nn.Sequential(torch.nn.Linear(self.dim_mlp, 1000),
                                        torch.nn.ReLU(),
-                                       torch.nn.Linear(self.dim_mlp, self.embedding_dim),
+                                       torch.nn.Linear(1000, self.embedding_dim),
                                        torch.nn.ReLU())
         if device == "cpu" or not torch.cuda.is_available():
             if device != "cpu":

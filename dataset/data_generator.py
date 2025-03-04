@@ -33,7 +33,7 @@ def save_dataset_json(root_folder='dataset/mvtec', json_path='dataset/dataset.js
 
 class MvTecDataset(Dataset):
     def __init__(self, json_path='dataset/dataset.json', train=True, img_size=256,
-                 mean=[0.4914, 0.4822, 0.4465],  std=[0.2470, 0.2435, 0.2616]):
+                 mean=[0.485, 0.456, 0.406],  std=[0.229, 0.224, 0.225]):
         """Loads image paths and labels from a JSON file."""
         with open(json_path, 'r') as file:
             dataset_dict = json.load(file)
