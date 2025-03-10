@@ -12,7 +12,7 @@ from dataset import preprocess_for_train
 
 class Trainer:
     def __init__(self, model, dataloader, optimizer, save_checkpoints = None,
-                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 10,
+                 criterion = contrastive_loss, normalizer = l2_normalize, validationstep = 5,
                  checkpoint_dir = "./checkpoints", scheduler=None, dataloader_val = None, device = "cuda"):
         self.model = model
         self.device = device
@@ -103,7 +103,7 @@ class Trainer:
 
         # Clear GPU memory
         del mini_batch, augmented_batch, representations, projections, loss
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
         return losses
     
@@ -136,7 +136,7 @@ class Trainer:
 
                 # Clear GPU memory for each batch
                 del mini_batch, augmented_batch, representations, projections, loss
-                torch.cuda.empty_cache()
+                # torch.cuda.empty_cache()
 
         avg_loss = np.mean(val_losses)
         self.tracker[epoch+1]["Loss_val"] = avg_loss
@@ -191,7 +191,7 @@ class Trainer:
                 self.save_checkpoint(epoch)
 
             # Clear GPU memory after each epoch
-            torch.cuda.empty_cache()
+            # torch.cuda.empty_cache()
         
         tracker_path = os.path.join(self.checkpoint_dir, "tracker.json")
         with open(tracker_path, "w") as f:

@@ -10,19 +10,19 @@ class ResNetSimCLR(nn.Module):
         self.embedding_dim = embedding_dim
 
         if size == 18:
-            self.model = models.resnet18(weight=None)
+            self.model = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1) 
         elif size == 50:
-            self.model = models.resnet50(weights=None)
+            self.model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
         elif size == 101:
-            self.model = models.resnet101(weight=None)
+            self.model = models.resnet101(weights=models.ResNet101_Weights.IMAGENET1K_V1)
         else:
             print("The passed model size is nopt available, therefore irt will be set to the defaults value and ResNet50 will be used!")
             self.model = models.resnet50(pretrained=False)
 
         self.dim_mlp = self.model.fc.in_features
-        self.model.fc = torch.nn.Sequential(torch.nn.Linear(self.dim_mlp, self.dim_mlp),
+        self.model.fc = torch.nn.Sequential(torch.nn.Linear(self.dim_mlp, 1000),
                                        torch.nn.ReLU(),
-                                       torch.nn.Linear(self.dim_mlp, self.embedding_dim),
+                                       torch.nn.Linear(1000, self.embedding_dim),
                                        torch.nn.ReLU())
         if device == "cpu" or not torch.cuda.is_available():
             if device != "cpu":
