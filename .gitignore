@@ -3,6 +3,7 @@ cifar*
 __pycache__
 *.pt
 *.png
+!images/image.png
 *.jpg
 *.mp4
 *.avi
